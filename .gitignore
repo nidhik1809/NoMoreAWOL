@@ -1,0 +1,17 @@
+# Backend ignores
+/NoMoreAwol-backend/target/
+/NoMoreAwol-backend/.idea/
+/NoMoreAwol-backend/*.iml
+/NoMoreAwol-backend/.mvn/
+/NoMoreAwol-backend/*.log
+/NoMoreAwol-backend/application.properties
+/NoMoreAwol-backend/application.yml
+
+# Frontend ignores
+/NoMoreAwol-frontend/node_modules/
+/NoMoreAwol-frontend/.env
+/NoMoreAwol-frontend/.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
