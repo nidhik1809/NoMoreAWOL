@@ -22,7 +22,9 @@
 ## 📁 Project Structure
 
 NoMoreAwol/
+
 ├── NoMoreAwol-backend/ # Spring Boot backend
+
 └── NoMoreAwol-frontend/ # React frontend
 
 
