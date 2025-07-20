@@ -7,86 +7,86 @@
 ## 🛠️ Tech Stack
 
 ### 🌐 Frontend
-- React.js
-- Tailwind CSS
-- Framer Motion (UI animations)
+- **React.js**
+- **Tailwind CSS**
+- **Framer Motion** (for rich UI animations)
 
 ### ⚙️ Backend
-- Java Spring Boot
-- Spring Security (JWT-based authentication)
-- PostgreSQL
-- Maven
+- **Java Spring Boot**
+- **Spring Security** (JWT-based authentication)
+- **PostgreSQL**
+- **Maven**
 
 ---
 
 ## 📁 Project Structure
 
 NoMoreAwol/
-
 ├── NoMoreAwol-backend/ # Spring Boot backend
-
 └── NoMoreAwol-frontend/ # React frontend
-
 
 ---
 
 ## 🔐 Features
 
 ### ✅ Authentication & Authorization
-- JWT-secured login/register
-- Role-based access: Employee vs Manager
+- [x] JWT-secured login and registration
+- [x] Role-based access control (Employee vs Manager)
 
-### 👩‍💼 Employee Dashboard
-- Clock-in/Clock-out tracking
-- Select work mode: WFH / Office
-- Log lunch breaks & meeting details
-- View assigned tasks and work logs
+### ✅ Employee Dashboard
+- [x] Clock-in/Clock-out functionality
+- [x] Toggle between WFH / Office modes
+- [x] Input lunch breaks & meeting details
+- [x] View assigned tasks and work logs
 
-### 👨‍💼 Manager Dashboard
-- Search and monitor employees
-- Assign/update tasks
-- Schedule & manage meetings
-- Track productivity, idle time & work stats
-- View task analytics by status, priority, complexity
+### ✅ Manager Dashboard
+- [x] Search and view employee details
+- [x] Assign and update tasks
+- [x] Schedule and manage meetings
+- [x] Track productivity, idle time & employee stats
+- [x] View task analytics (by status, priority, complexity)
 
 ---
 
-## 📦 Getting Started
+## ⚙️ Getting Started
 
 ### 🔧 Backend Setup (Spring Boot)
 
-1. Navigate to backend directory:
-   ```bash
+1. Navigate to the backend folder:
    cd NoMoreAwol-backend
-2. Add your DB config and secrets to:
+Configure your database and secrets in:
    src/main/resources/application.properties
-3. Run the application:
+Run the backend server:
    ./mvnw spring-boot:run
-
-💻 Frontend Setup (React)
-1. Navigate to frontend directory:
-     cd NoMoreAwol-frontend
-2. Install dependencies:
-     npm install
-3. Start development server:
-     npm run dev
    
+💻 Frontend Setup (React)
+   Navigate to the frontend folder:
+      cd NoMoreAwol-frontend
+   Install all dependencies:
+      npm install
+   Start the frontend dev server:
+      npm run dev
+
+
 📝 To-Do
+ Implement full API logic for:
 
  Clock-in/out, WFH tracking
 
- Meetings & Task management APIs
+ Meeting and task management
 
- Add productivity graphs
+ Productivity stats
 
- Dockerize & Deploy to cloud
+ Add productivity graphs and charts (D3 / Recharts)
 
-💡 Inspiration
-This project was built as a productivity enhancer and full-stack practice tool. The goal is to combine real-world features with clean UI, effective backend structure, and future-ready AI enhancements.
+ Dockerize frontend + backend
+
+ Deploy to cloud (Render / Railway / Vercel)
+
 
 🤝 Contributing
 Pull requests are welcome!
-For major changes, please open an issue first to discuss what you’d like to improve.
+For major feature changes, please open an issue to discuss your ideas beforehand.
 
 📬 Contact
 Nidhi Kulkarni
@@ -94,6 +94,4 @@ Nidhi Kulkarni
 🌐 LinkedIn
 
 ⭐️ Show Your Support
-If you like this project, please ⭐ the repo!
-Your support helps me keep building & improving 🔥
-
+If you like this project, consider giving it a ⭐ on GitHub!
