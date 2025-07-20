@@ -1,5 +1,9 @@
-// filepath: k:\Coding\Springboot Projects\nomoreawol-frontend\tailwind.config.js
+/** @type {import('tailwindcss').Config} */
 module.exports = {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,jsx,ts,tsx}",
+  ],
   theme: {
     extend: {
       colors: {
