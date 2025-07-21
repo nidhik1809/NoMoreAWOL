@@ -73,8 +73,6 @@ Run the backend server:
 
  Clock-in/out, WFH tracking
 
- Meeting and task management
-
  Productivity stats
 
  Add productivity graphs and charts (D3 / Recharts)
