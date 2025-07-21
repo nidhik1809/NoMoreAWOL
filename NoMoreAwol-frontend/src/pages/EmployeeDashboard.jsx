@@ -12,6 +12,7 @@ const EmployeeDashboard = () => {
   const [newTask, setNewTask] = useState("");
   const [workMode, setWorkMode] = useState(localStorage.getItem("workMode") || "office");
   const [showTaskForm, setShowTaskForm] = useState(false);
+  const [activeWorkLog, setActiveWorkLog] = useState({}); // Track active work logs by task ID
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -24,10 +25,14 @@ const EmployeeDashboard = () => {
         });
         setEmployeeData(data);
         
-        const tasksRes = await axios.get(`http://localhost:8081/api/assignments/employee/${data.empId}`);
+        const tasksRes = await axios.get(`http://localhost:8081/api/assignments/employee/${data.empId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
         setTasks(tasksRes.data);
         
-        const meetingsRes = await axios.get(`http://localhost:8081/api/meetings/employee/${data.empId}`);
+        const meetingsRes = await axios.get(`http://localhost:8081/api/meetings/employee/${data.empId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
         setMeetings(meetingsRes.data);
       } catch (err) {
         console.error("Fetch error:", err);
@@ -41,14 +46,28 @@ const EmployeeDashboard = () => {
     if (!newTask.trim()) return;
     
     try {
-      const res = await axios.post("http://localhost:8081/api/tasks", {
-        title: newTask,
-        employeeId: employeeData.empId
-      }, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-      });
+      const token = localStorage.getItem("token");
+      const res = await axios.post(
+        "http://localhost:8081/api/tasks",
+        {
+          title: newTask,
+          employeeId: employeeData.empId
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
       
-      setTasks([...tasks, res.data]);
+      const assignmentRes = await axios.post(
+        "http://localhost:8081/api/assignments",
+        {
+          taskId: res.data.id,
+          employeeId: employeeData.empId
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      setTasks([...tasks, assignmentRes.data]);
       setNewTask("");
       setShowTaskForm(false);
     } catch (err) {
@@ -59,6 +78,75 @@ const EmployeeDashboard = () => {
   const handleWorkModeChange = (mode) => {
     setWorkMode(mode);
     localStorage.setItem("workMode", mode);
+  };
+
+  const handleClockIn = async (taskId, assignmentId) => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.post(
+        "http://localhost:8081/api/worklogs/start",
+        {
+          date: new Date().toISOString().split("T")[0],
+          clockIn: new Date().toISOString().slice(11, 19),
+          isWorkFromHome: workMode === "wfh",
+          employeeId: employeeData.empId,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setActiveWorkLog({ ...activeWorkLog, [taskId]: res.data.id });
+
+      // Update task status to "In Progress"
+      await axios.put(
+        `http://localhost:8081/api/assignments/${assignmentId}`,
+        { status: "In Progress", completionPercentage: activeWorkLog[taskId] ? 50 : 0 },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      // Refresh tasks
+      const tasksRes = await axios.get(`http://localhost:8081/api/assignments/employee/${employeeData.empId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setTasks(tasksRes.data);
+    } catch (err) {
+      console.error("Clock-in error:", err);
+    }
+  };
+
+  const handleClockOut = async (taskId, assignmentId) => {
+    try {
+      const token = localStorage.getItem("token");
+      const workLogId = activeWorkLog[taskId];
+      await axios.put(
+        `http://localhost:8081/api/worklogs/end/${workLogId}`,
+        {
+          clockOut: new Date().toISOString().slice(11, 19),
+          lunchBreakMinutes: 30, // Example: assume 30 min lunch break
+          idleMinutes: 0, // Example: assume no idle time
+          isWorkFromHome: workMode === "wfh",
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      // Update task status to "Completed"
+      await axios.put(
+        `http://localhost:8081/api/assignments/${assignmentId}`,
+        { status: "Completed", completionPercentage: 100 },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      // Remove from active work logs
+      const newActiveWorkLog = { ...activeWorkLog };
+      delete newActiveWorkLog[taskId];
+      setActiveWorkLog(newActiveWorkLog);
+
+      // Refresh tasks
+      const tasksRes = await axios.get(`http://localhost:8081/api/assignments/employee/${employeeData.empId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setTasks(tasksRes.data);
+    } catch (err) {
+      console.error("Clock-out error:", err);
+    }
   };
 
   return (
@@ -220,16 +308,42 @@ const EmployeeDashboard = () => {
                       <div>
                         <h3 className="font-medium">{task.task.title}</h3>
                         <p className="text-sm text-gray-400 mt-1">
-                          {new Date(task.assignedDate).toLocaleDateString()}
+                          Due: {new Date(task.task.dueDate).toLocaleDateString()}
+                        </p>
+                        <p className="text-sm text-gray-400">
+                          Priority: {task.task.priority} | Complexity: {task.task.complexity}
                         </p>
                       </div>
-                      <span className={`px-2 py-1 text-xs rounded-full ${
-                        task.status === "Completed" 
-                          ? "bg-green-900/50 text-green-300" 
-                          : "bg-yellow-900/50 text-yellow-300"
-                      }`}>
-                        {task.status}
-                      </span>
+                      <div className="flex items-center space-x-2">
+                        <span
+                          className={`px-2 py-1 text-xs rounded-full ${
+                            task.status === "Completed" 
+                              ? "bg-green-900/50 text-green-300" 
+                              : "bg-yellow-900/50 text-yellow-300"
+                          }`}
+                        >
+                          {task.status}
+                        </span>
+                        {task.status !== "Completed" && (
+                          <>
+                            {activeWorkLog[task.task.id] ? (
+                              <button
+                                onClick={() => handleClockOut(task.task.id, task.id)}
+                                className="px-3 py-1 bg-red-600 hover:bg-red-700 rounded-lg text-sm"
+                              >
+                                Clock Out
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => handleClockIn(task.task.id, task.id)}
+                                className="px-3 py-1 bg-green-600 hover:bg-green-700 rounded-lg text-sm"
+                              >
+                                Clock In
+                              </button>
+                            )}
+                          </>
+                        )}
+                      </div>
                     </div>
                     <div className="flex items-center mt-3">
                       <div className="w-full bg-gray-700 rounded-full h-2">
